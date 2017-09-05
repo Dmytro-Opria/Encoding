@@ -27,7 +27,7 @@ type BiteA struct {
 func main() {
 	pathJson := "test_arr1.json"
 	writeArr(pathJson)
-	//fmt.Println(readLines(pathJson))
+	fmt.Println(readLines(pathJson))
 
 	pathBinary := "test_binary.txt"
 
@@ -37,36 +37,17 @@ func main() {
 }
 
 func writeArr(path string) {
-	testSlice := getSlice()
-	for i, v := range testSlice {
-		if i == 0 {
-			writeFirstBreak(path)
-		}
-		val, _ := json.Marshal(v)
-
-		if i+1 == len(testSlice) {
-			writeLine(val, path, true)
-			writeLastBreak(path)
-		} else {
-			writeLine(val, path, false)
-		}
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return
 	}
-}
-
-func writeFirstBreak(path string) {
-	file, _ := os.Create(path)
-
 	defer file.Close()
 
-	file.WriteString("[\n")
-}
+	for _, v := range getSlice() {
 
-func writeLastBreak(path string) {
-	file, _ := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		json.NewEncoder(file).Encode(v)
 
-	defer file.Close()
-
-	file.WriteString("\n]")
+	}
 }
 
 func readLines(path string) (Arr []A, err error) {
@@ -81,9 +62,7 @@ func readLines(path string) (Arr []A, err error) {
 	for {
 		line, err := reader.ReadLine()
 		if err != nil {
-			if line != "[" {
-				break
-			}
+			break
 		}
 		a := A{}
 		json.Unmarshal([]byte(strings.TrimSuffix(line, ",")), &a)
@@ -91,60 +70,6 @@ func readLines(path string) (Arr []A, err error) {
 	}
 	return
 }
-
-func writeLine(line []byte, path string, last bool) error {
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	if last {
-		file.WriteString(string(line))
-	} else {
-		file.WriteString(string(line) + ",\n")
-	}
-	return nil
-}
-
-/*
-func serializeSlice(fileName string, Test []A) (err error) {
-
-	buf := []byte{}
-	buf = append(buf, []byte("[\n\t")...)
-
-	for i, a := range Test {
-		jsonTest, _ := json.Marshal(a)
-		buf = append(buf, jsonTest...)
-		if i+1 == len(Test){
-			buf = append(buf, []byte("\n")...)
-			buf = append(buf, []byte("]")...)
-		}else{
-			buf = append(buf, []byte(",\n\t")...)
-		}
-	}
-	err = writeByte(fileName, buf)
-
-	return nil
-}
-
-func writeByte(fileName string, byte []byte)(err error){
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, 0644)
-
-	if err != nil {
-		fmt.Printf("os.OpenFile\n %s", err)
-		return
-	}
-
-	_, err = file.Write(byte)
-
-	if err != nil {
-		fmt.Printf("file.Write\n %s", err)
-		return
-	}
-	return nil
-}
-*/
 
 func getSlice() []A {
 	ASlice := make([]A, 10)
