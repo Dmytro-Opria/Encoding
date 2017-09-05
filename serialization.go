@@ -171,7 +171,7 @@ func writeBinarySlice(path string) (err error){
 	return
 }
 
-func binaryEncode(test A) (res []byte) {
+func binaryEncode(test A) ([]byte) {
 	curStruct := BiteA{int16(test.A), uint64(test.B), int64(test.C)}
 	curStr := []byte(test.S)
 	buf := new(bytes.Buffer)
@@ -179,16 +179,17 @@ func binaryEncode(test A) (res []byte) {
 	if err != nil {
 		panic(err)
 	}
-	result := append(buf.Bytes(), curStr...)
-
 	length := make([]byte, 8)
 
-	binary.LittleEndian.PutUint64(length, uint64(len(result)+8))
+	binary.LittleEndian.PutUint64(length, uint64(len(curStr)))
 
-	res = append(length, result...)
+	buf.Write(length)
 
-	//fmt.Println(res)
-	return
+	buf.Write(curStr)
+
+	fmt.Println(buf.Bytes())
+
+	return buf.Bytes()
 }
 
 func binaryDecode(path string) (ASlice []A){
@@ -200,20 +201,35 @@ func binaryDecode(path string) (ASlice []A){
 	}
 
 	for {
-		b := make([]byte, 8)
+		b := make([]byte, 18)
+
 		_, err := f.Read(b)
+
+		val := A{}
+
+		val.A = int16(binary.BigEndian.Uint16(b[0:2]))
+		val.B = binary.BigEndian.Uint64(b[2:10])
+		val.C = int(binary.BigEndian.Uint64(b[10:18]))
 
 		if err != nil {
 			break
 		}
 
-		valueLength := int(binary.LittleEndian.Uint64(b))-8
+		lenStr := make([]byte, 8)
 
-		b = make([]byte, valueLength)
+		_, err = f.Read(lenStr)
 
-		_, err = f.Read(b)
+		valueLength := int(binary.LittleEndian.Uint64(lenStr))
 
-		ASlice = append(ASlice, makeA(b))
+		str := make([]byte, valueLength)
+
+		_, err = f.Read(str)
+
+		val.S = string(str)
+
+		fmt.Println(val)
+
+		ASlice = append(ASlice, val)
 
 		if err != nil {
 			break
@@ -223,13 +239,3 @@ func binaryDecode(path string) (ASlice []A){
 	return
 }
 
-func makeA(input []byte)(val A){
-	val.A = int16(binary.BigEndian.Uint16(input[0:2]))
-	val.B = binary.BigEndian.Uint64(input[2:10])
-	val.C = int(binary.BigEndian.Uint64(input[10:18]))
-	val.S = string(input[18:])
-
-	fmt.Println(input)
-	fmt.Println(val)
-	return
-}
