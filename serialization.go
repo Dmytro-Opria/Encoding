@@ -25,11 +25,12 @@ type BiteA struct {
 }
 
 func main() {
-	pathJson := "test_arr1.json"
-	writeArr(pathJson)
-	fmt.Println(readLines(pathJson))
-
+	pathJson := "test_arr1.txt"
 	pathBinary := "test_binary.txt"
+
+	writeArr(pathJson)
+
+	fmt.Println(readLines(pathJson))
 
 	writeBinarySlice(pathBinary)
 
@@ -159,8 +160,6 @@ func binaryDecode(path string) (ASlice []A){
 		if err != nil {
 			break
 		}
-
 	}
 	return
 }
-
