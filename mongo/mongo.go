@@ -40,7 +40,7 @@ func insert(){
 
 	c := sess.DB("test").C("testCollection")
 
-	changeInfo, err := c.Upsert(nil,bson.M{"name": "newJohn", "age": 110})
+	changeInfo, err := c.Upsert(bson.M{"_id":bson.NewObjectId()},bson.M{"name": "newJohn", "age": 120})
 
 
 	fmt.Println(changeInfo.UpsertedId)
