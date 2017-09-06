@@ -1,14 +1,17 @@
 package main
 
 import (
-	"golib/mongo"
 	"fmt"
+	"golib/mongo"
 	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
 type Person struct {
-	Name string `bson:"name"`
-	Age int `bson:"age"`
+	Name       string    `bson:"name"`
+	Age        int       `bson:"age"`
+	LastUpdate time.Time `bson:"lastupdate"`
+	Count      int       `bson:"count"`
 }
 
 type MongoInitConfig struct{}
@@ -17,10 +20,10 @@ var globalMgoSession mongo.MongoSession
 
 func (_ MongoInitConfig) Get() *mongo.MongodbConfig {
 	var cfg = mongo.MongodbConfig{
-		User: "root",
+		User:     "root",
 		Password: "123",
-		Host: "127.0.0.1:27017",
-		DbName: "admin",
+		Host:     "127.0.0.1:27017",
+		DbName:   "admin",
 	}
 	return &cfg
 }
@@ -29,23 +32,23 @@ func mongoConnect() {
 	globalMgoSession = mongo.Init(MongoInitConfig{})
 }
 
-func main(){
+func main() {
 	mongoConnect()
 	//insert()
 	//fmt.Println(findAndSort())
 	//fmt.Println(findFirstOne())
 	//fmt.Println(findLastOne())
-	fmt.Println(findWithNatural())
+	//fmt.Println(findWithNatural())
+	incrementAllCounters()
 }
 
-func insert(){
+func insert() {
 	_, sess, def := globalMgoSession.Get()
 	defer def()
 
 	c := sess.DB("test").C("testCollection")
 
-	changeInfo, err := c.Upsert(bson.M{"_id":bson.NewObjectId()},bson.M{"name": "Hermiona", "age": 27})
-
+	changeInfo, err := c.Upsert(bson.M{"_id": bson.NewObjectId()}, bson.M{"name": "Hermiona", "age": 27})
 
 	fmt.Println(changeInfo.UpsertedId)
 
@@ -54,7 +57,7 @@ func insert(){
 	}
 }
 
-func findAndSort()(result []Person){
+func findAndSort() (result []Person) {
 	_, sess, def := globalMgoSession.Get()
 	defer def()
 
@@ -65,7 +68,7 @@ func findAndSort()(result []Person){
 	return
 }
 
-func findFirstOne()(res Person){
+func findFirstOne() (res Person) {
 	_, sess, def := globalMgoSession.Get()
 	defer def()
 
@@ -76,7 +79,7 @@ func findFirstOne()(res Person){
 	return
 }
 
-func findLastOne()(res Person){
+func findLastOne() (res Person) {
 	_, sess, def := globalMgoSession.Get()
 	defer def()
 
@@ -87,7 +90,7 @@ func findLastOne()(res Person){
 		return
 	}
 
-	err = c.Find(nil).Skip(dbSize-1).One(&res)
+	err = c.Find(nil).Skip(dbSize - 1).One(&res)
 	if err != nil {
 		return
 	}
@@ -95,14 +98,27 @@ func findLastOne()(res Person){
 	return
 }
 
-func findWithNatural()(res []Person){
+func findWithNatural() (res []Person) {
 	_, sess, def := globalMgoSession.Get()
 	defer def()
 
 	c := sess.DB("test").C("testCollection")
 
-
 	c.Find(nil).Sort("-$natural").Limit(2).All(&res)
 
 	return
+}
+
+func incrementAllCounters() {
+	_, sess, def := globalMgoSession.Get()
+	defer def()
+
+	c := sess.DB("test").C("testCollection")
+
+	change := bson.M{"$inc": bson.M{"counter": 1}, "$set": bson.M{"lastUpdate": time.Now()}}
+	info, err := c.UpdateAll(bson.M{}, change)
+	if err != nil {
+		fmt.Println("Error ocured", err)
+	}
+	fmt.Println(info)
 }
