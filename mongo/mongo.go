@@ -6,11 +6,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type Person struct {
-	Name string `bson:"name"`
-	Age int `bson:"age"`
-}
-
 type MongoInitConfig struct{}
 
 var globalMgoSession mongo.MongoSession
