@@ -47,7 +47,6 @@ func writeArr(path string) {
 	for _, v := range getSlice() {
 
 		json.NewEncoder(file).Encode(v)
-
 	}
 }
 
