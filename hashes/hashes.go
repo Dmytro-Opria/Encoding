@@ -19,12 +19,10 @@ func main(){
 }
 
 func toMd5(r io.Reader)(bytes []byte, hexStr string, base64Str string){
-	input := make([]byte, 1000)
-
-	r.Read(input)
 
 	h := md5.New()
-	io.WriteString(h,string(input))
+
+	io.Copy(h, r)
 
 	bytes = h.Sum(nil)
 
@@ -36,12 +34,10 @@ func toMd5(r io.Reader)(bytes []byte, hexStr string, base64Str string){
 }
 
 func toSha1(r io.Reader)(bytes []byte, hexStr string, base64Str string){
-	input := make([]byte, 1000)
-
-	r.Read(input)
 
 	h := sha1.New()
-	io.WriteString(h,string(input))
+
+	io.Copy(h, r)
 
 	bytes = h.Sum(nil)
 
