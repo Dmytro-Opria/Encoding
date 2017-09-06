@@ -7,18 +7,24 @@ import (
 	"encoding/hex"
 	"encoding/base64"
 	"crypto/sha1"
+	"strings"
 )
 
 func main(){
 	testStr := "abcdefg"
 
-	fmt.Println(toMd5(testStr))
-	fmt.Println(toSha1(testStr))
+	fmt.Println(toMd5(strings.NewReader(testStr)))
+
+	fmt.Println(toSha1(strings.NewReader(testStr)))
 }
 
-func toMd5(input string)(bytes []byte, hexStr string, base64Str string){
+func toMd5(r io.Reader)(bytes []byte, hexStr string, base64Str string){
+	input := make([]byte, 1000)
+
+	r.Read(input)
+
 	h := md5.New()
-	io.WriteString(h,input)
+	io.WriteString(h,string(input))
 
 	bytes = h.Sum(nil)
 
@@ -29,9 +35,13 @@ func toMd5(input string)(bytes []byte, hexStr string, base64Str string){
 	return
 }
 
-func toSha1(input string)(bytes []byte, hexStr string, base64Str string){
+func toSha1(r io.Reader)(bytes []byte, hexStr string, base64Str string){
+	input := make([]byte, 1000)
+
+	r.Read(input)
+
 	h := sha1.New()
-	io.WriteString(h,input)
+	io.WriteString(h,string(input))
 
 	bytes = h.Sum(nil)
 
