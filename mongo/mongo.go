@@ -6,6 +6,11 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+type Person struct {
+	Name string `bson:"name"`
+	Age int `bson:"age"`
+}
+
 type MongoInitConfig struct{}
 
 var globalMgoSession mongo.MongoSession
@@ -26,7 +31,8 @@ func mongoConnect() {
 
 func main(){
 	mongoConnect()
-	insert()
+	//insert()
+	fmt.Println(findAndSort())
 }
 
 func insert(){
@@ -35,7 +41,7 @@ func insert(){
 
 	c := sess.DB("test").C("testCollection")
 
-	changeInfo, err := c.Upsert(bson.M{"_id":bson.NewObjectId()},bson.M{"name": "newJohn", "age": 120})
+	changeInfo, err := c.Upsert(bson.M{"_id":bson.NewObjectId()},bson.M{"name": "Hermiona", "age": 27})
 
 
 	fmt.Println(changeInfo.UpsertedId)
@@ -43,4 +49,15 @@ func insert(){
 	if err != nil {
 		fmt.Println("Error ocured", err)
 	}
+}
+
+func findAndSort()(result []Person){
+	_, sess, def := globalMgoSession.Get()
+	defer def()
+
+	c := sess.DB("test").C("testCollection")
+
+	c.Find(bson.M{}).Sort("age").All(&result)
+
+	return
 }
