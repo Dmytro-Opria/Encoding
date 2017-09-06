@@ -32,7 +32,9 @@ func mongoConnect() {
 func main(){
 	mongoConnect()
 	//insert()
-	fmt.Println(findAndSort())
+	//fmt.Println(findAndSort())
+	fmt.Println(findFirstOne())
+	fmt.Println(findLastOne())
 }
 
 func insert(){
@@ -58,6 +60,36 @@ func findAndSort()(result []Person){
 	c := sess.DB("test").C("testCollection")
 
 	c.Find(bson.M{}).Sort("age").All(&result)
+
+	return
+}
+
+func findFirstOne()(res Person){
+	_, sess, def := globalMgoSession.Get()
+	defer def()
+
+	c := sess.DB("test").C("testCollection")
+
+	c.Find(nil).One(&res)
+
+	return
+}
+
+func findLastOne()(res Person){
+	_, sess, def := globalMgoSession.Get()
+	defer def()
+
+	c := sess.DB("test").C("testCollection")
+
+	dbSize, err := c.Count()
+	if err != nil {
+		return
+	}
+
+	err = c.Find(nil).Skip(dbSize-1).One(&res)
+	if err != nil {
+		return
+	}
 
 	return
 }
