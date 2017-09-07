@@ -2,14 +2,17 @@ package main
 
 import (
 	"testing"
+	_"os"
+	_"bufio"
+	"os/exec"
+	"fmt"
 	"os"
 	"bufio"
-	"os/exec"
 )
 
 func TestCreateWCfile(t *testing.T) {
 	fileName := "TestFunc.txt"
-	testValue := []byte{}
+	value := []byte{}
 	CreateWCfile(fileName)
 
 	defer os.Remove(fileName)
@@ -20,18 +23,29 @@ func TestCreateWCfile(t *testing.T) {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		testValue = append(testValue, scanner.Bytes()...)
+		value = append(value, scanner.Bytes()...)
 	}
 
-	fileNameCom := "TestCommand.txt"
+	cmd := exec.Command("sh","-c","wc -l exec.go > TestCommand.txt")
 
-	fileCom, _ := os.Create(fileNameCom)
+	err = cmd.Run()
 
-	cmd := exec.Command("wc", "-l", "exec.go", ">", fileNameCom)
+	fmt.Println(err)
 
-	cmd.Stdout = fileCom
 
-	/*if  strings.Contains(string(testValue), string(cmd)){
-		t.Error("The values are not equal\n", string(testValue),"\n", string(cmd))
-	}*/
+	testValue := []byte{}
+
+	fileTest, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
+	if err != nil {
+		t.Error("Can not open file", err)
+	}
+	scannerTest := bufio.NewScanner(fileTest)
+
+	for scannerTest.Scan() {
+		testValue = append(testValue, scannerTest.Bytes()...)
+	}
+
+	if string(value) != string(testValue){
+		t.Error("The values are not equal\n", string(testValue),"\n", string(value))
+	}
 }
