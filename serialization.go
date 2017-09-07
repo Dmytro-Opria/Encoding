@@ -82,7 +82,7 @@ func getSlice() []A {
 	return ASlice
 }
 
-func writeBinarySlice(path string) (err error){
+func writeBinarySlice(path string) (err error) {
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return
@@ -96,7 +96,7 @@ func writeBinarySlice(path string) (err error){
 	return
 }
 
-func binaryEncode(test A) ([]byte) {
+func binaryEncode(test A) []byte {
 	curStruct := BiteA{int16(test.A), uint64(test.B), int64(test.C)}
 	curStr := []byte(test.S)
 	buf := new(bytes.Buffer)
@@ -117,7 +117,7 @@ func binaryEncode(test A) ([]byte) {
 	return buf.Bytes()
 }
 
-func binaryDecode(path string) (ASlice []A){
+func binaryDecode(path string) (ASlice []A) {
 
 	f, err := os.Open(path)
 

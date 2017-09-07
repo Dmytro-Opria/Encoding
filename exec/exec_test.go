@@ -1,13 +1,13 @@
 package main
 
 import (
-	"testing"
-	_"os"
-	_"bufio"
-	"os/exec"
+	"bufio"
+	_ "bufio"
 	"fmt"
 	"os"
-	"bufio"
+	_ "os"
+	"os/exec"
+	"testing"
 )
 
 func TestCreateWCfile(t *testing.T) {
@@ -26,12 +26,11 @@ func TestCreateWCfile(t *testing.T) {
 		value = append(value, scanner.Bytes()...)
 	}
 
-	cmd := exec.Command("sh","-c","wc -l exec.go > TestCommand.txt")
+	cmd := exec.Command("sh", "-c", "wc -l exec.go > TestCommand.txt")
 
 	err = cmd.Run()
 
 	fmt.Println(err)
-
 
 	testValue := []byte{}
 
@@ -45,7 +44,7 @@ func TestCreateWCfile(t *testing.T) {
 		testValue = append(testValue, scannerTest.Bytes()...)
 	}
 
-	if string(value) != string(testValue){
-		t.Error("The values are not equal\n", string(testValue),"\n", string(value))
+	if string(value) != string(testValue) {
+		t.Error("The values are not equal\n", string(testValue), "\n", string(value))
 	}
 }

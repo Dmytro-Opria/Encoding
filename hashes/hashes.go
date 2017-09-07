@@ -1,15 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
-	"strings"
 	"os"
-	"bufio"
+	"strings"
 )
 
 func main() {

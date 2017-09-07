@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"math/rand"
+	"sort"
 	"time"
 )
 
@@ -42,12 +42,12 @@ func intReverseSorting(intArr []int) {
 	sort.Sort(sort.Reverse(sort.IntSlice(intArr)))
 }
 
-func intRandomizer(min, max int) int{
+func intRandomizer(min, max int) int {
 	rand.Seed(time.Now().Unix())
-	return rand.Intn(max - min) + min
+	return rand.Intn(max-min) + min
 }
 
-func floatRandomizer(min int64) float64{
+func floatRandomizer(min int64) float64 {
 	source := rand.NewSource(min)
 	random := rand.New(source)
 

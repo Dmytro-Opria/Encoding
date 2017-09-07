@@ -1,16 +1,15 @@
 package main
 
 import (
-	"os/exec"
 	"os"
+	"os/exec"
 )
 
-
-func main(){
+func main() {
 	CreateWCfile("execCommand.txt")
 }
 
-func CreateWCfile(fileName string)(err error){
+func CreateWCfile(fileName string) (err error) {
 	cmd := exec.Command("wc", "-l", "exec.go")
 
 	file, err := os.Create(fileName)
