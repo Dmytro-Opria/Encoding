@@ -3,10 +3,9 @@ package main
 import (
 	"testing"
 	"os"
-	"fmt"
 	"bufio"
 	"os/exec"
-	"log"
+	"strings"
 )
 
 func TestCreateWCfile(t *testing.T) {
@@ -17,7 +16,7 @@ func TestCreateWCfile(t *testing.T) {
 	defer os.Remove(fileName)
 	file, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
 	if err != nil {
-		fmt.Println("OpenFile Error", err)
+		t.Error("Can not open file", err)
 	}
 	scanner := bufio.NewScanner(file)
 
@@ -27,7 +26,9 @@ func TestCreateWCfile(t *testing.T) {
 
 	fileNameCom := "TestCommand.txt"
 
-	cmd := exec.Command("wc", "-l", "exec.go", ">", fileNameCom)
-	log.Printf("Running command and waiting for it to finish...")
-	cmd.Start()
+	cmd, _ := exec.Command("wc", "-l", "exec.go", ">", fileNameCom).Output()
+
+	if  strings.Contains(string(testValue), string(cmd)){
+		t.Error("The values are not equal\n", string(testValue),"\n", string(cmd))
+	}
 }
