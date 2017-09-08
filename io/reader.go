@@ -13,13 +13,13 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01
 
 func main(){
 	r := Reader{}
-	b := make([]byte, 10)
+	b := make([]byte, 100)
 	r.Read(b)
 	fmt.Println(string(b))
 }
 
 func(r Reader) Read(p []byte) (n int, err error){
-	for i := 0; i < 10; i++ {
+	for i := 0; i < len(p); i++ {
 		p[i] = []byte(string(letterRunes[intRandomizer(0,len(letterRunes), i)]))[0]
 	}
 	return n, nil
