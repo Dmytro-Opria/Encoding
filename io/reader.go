@@ -13,9 +13,10 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01
 
 func main(){
 	r := Reader{}
-	b := make([]byte, 100)
+	b := make([]byte, 10)
 	r.Read(b)
 	fmt.Println(string(b))
+	fmt.Printf("%q\n", "a")
 }
 
 func(r Reader) Read(p []byte) (n int, err error){
