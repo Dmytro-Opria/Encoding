@@ -50,6 +50,7 @@ func main() {
 					break
 				}
 
+				conn.Write([]byte("Get = " + rstring))
 				fmt.Print(rstring)
 			}
 		}(conn)

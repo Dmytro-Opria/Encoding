@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"os"
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -17,7 +18,8 @@ func main() {
 
 		fmt.Fprintf(conn, text + "\n")
 
-		message, _ := bufio.NewReader(conn).ReadString('\n')
-		fmt.Print("Message from server: "+message)
+		time.Sleep(time.Second)
+		message, _, _ := bufio.NewReader(conn).ReadLine()
+		fmt.Print("Message from server: " + string(message)+"\n")
 	}
 }
