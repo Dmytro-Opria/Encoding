@@ -1,10 +1,10 @@
 package main
 
 import (
-	"net"
-	"fmt"
-	"os"
 	"bufio"
+	"fmt"
+	"net"
+	"os"
 )
 
 const (
@@ -14,23 +14,45 @@ const (
 )
 
 func main() {
-	l, err := net.Listen(CON_TYPE, CON_HOST + ":" + CON_PORT)
+	listener, err := net.Listen(CON_TYPE, CON_HOST + ":" + CON_PORT)
 
 	if err != nil {
 		fmt.Println("Error", err)
 		os.Exit(1)
 	}
-	defer l.Close()
+	defer listener.Close()
 
 	fmt.Println("Listening on " + CON_HOST + ":" + CON_PORT)
 
-	conn, err := l.Accept()
-
 	for {
-		message, _ := bufio.NewReader(conn).ReadString('\n')
+		conn, err := listener.Accept()
 
-		fmt.Print("Message Received:", string(message))
+		if err != nil {
+			fmt.Println("Can`t connect", err)
+			conn.Close()
+			continue
+		}
 
-		conn.Write([]byte(message + "\n"))
+		fmt.Println("Connected")
+
+		bufReader := bufio.NewReader(conn)
+
+		fmt.Println("Start reading")
+
+		go func(conn net.Conn) {
+			defer conn.Close()
+
+			for {
+				rstring, err := bufReader.ReadString('\n')
+
+				if err != nil {
+					fmt.Println("Can`t read", err)
+					break
+				}
+
+				fmt.Print(rstring)
+			}
+		}(conn)
+
 	}
 }
