@@ -37,6 +37,5 @@ func main() {
 
 		fmt.Print(string(buf))
 		listener.WriteTo(append([]byte("Get = "), buf...), addr)
-
 	}
 }
