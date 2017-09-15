@@ -2,25 +2,25 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"sync"
 	"sync/atomic"
+	"time"
 )
-var (
-	GlobalMap = make(map[string]string, 1)
-	GlobalMap2 = map[string]string{"A":"0","B":"0","C":"0"}
 
-	ABC = []string{"A","B","C"}
-	wg sync.WaitGroup
+var (
+	GlobalMap  = make(map[string]string, 1)
+	GlobalMap2 = map[string]string{"A": "0", "B": "0", "C": "0"}
+
+	ABC = []string{"A", "B", "C"}
+	wg  sync.WaitGroup
 	mut sync.Mutex
 
 	atomicMap atomic.Value
 )
 
-func init(){
+func init() {
 	atomicMap.Store(GlobalMap2)
 }
-
 
 func main() {
 	//Multiple writing
@@ -38,10 +38,10 @@ func main() {
 func makeGorutine(count int) {
 	wg.Add(count)
 
-	for i := 0; i < count ; i++ {
+	for i := 0; i < count; i++ {
 		timer := time.Now().Add(10 * time.Second)
 		go func(n int) {
-			for  {
+			for {
 				mut.Lock()
 				GlobalMap["ABC"] = ABC[n]
 				fmt.Println(ABC[n])
@@ -57,14 +57,13 @@ func makeGorutine(count int) {
 	wg.Wait()
 }
 
-
 //======Mutex
-func readMapByGorutine(count int){
+func readMapByGorutine(count int) {
 	wg.Add(count)
-	for i := 0; i < count ; i++ {
+	for i := 0; i < count; i++ {
 		timer := time.Now().Add(10 * time.Second)
 		go func(n int) {
-			for  {
+			for {
 				mut.Lock()
 				fmt.Println(GlobalMap2[ABC[n]])
 				mut.Unlock()
@@ -79,7 +78,7 @@ func readMapByGorutine(count int){
 	wg.Wait()
 }
 
-func writeTimeInMap(){
+func writeTimeInMap() {
 	timer := time.Now().Add(10 * time.Second)
 	wg.Add(1)
 	for {
@@ -95,42 +94,43 @@ func writeTimeInMap(){
 	}
 	wg.Wait()
 }
+
 //========Atomic
 
-func readMapByGorutineAtomic(count int){
+func readMapByGorutineAtomic(count int) {
 	wg.Add(count)
 	curMap := atomicMap.Load().(map[string]string)
 
-	for i := 0; i < count ; i++ {
+	for i := 0; i < count; i++ {
 		timer := time.Now().Add(10 * time.Second)
 
 		go func(n int) {
 			ticker := time.NewTicker(100 * time.Millisecond)
 
-			Loop:
-				for {
-					select {
-					case <-ticker.C:
-						curMap = atomicMap.Load().(map[string]string)
-					default:
-						fmt.Println(curMap[ABC[n]])
+		Loop:
+			for {
+				select {
+				case <-ticker.C:
+					curMap = atomicMap.Load().(map[string]string)
+				default:
+					fmt.Println(curMap[ABC[n]])
 
-						if time.Now().Unix() > timer.Unix() {
-							break Loop
-						}
+					if time.Now().Unix() > timer.Unix() {
+						break Loop
 					}
 				}
+			}
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
 }
 
-func writeTimeInMapAtomic(){
+func writeTimeInMapAtomic() {
 	timer := time.Now().Add(10 * time.Second)
 	wg.Add(1)
 	for {
-		globalMap := map[string]string{"A":"0","B":"0","C":"0"}
+		globalMap := map[string]string{"A": "0", "B": "0", "C": "0"}
 
 		for key := range globalMap {
 			globalMap[key] = time.Now().String()
@@ -143,4 +143,3 @@ func writeTimeInMapAtomic(){
 	}
 	wg.Wait()
 }
-
