@@ -63,13 +63,6 @@ func addMoney(id int, money float64)(error){
 	if err != nil {
 		return err
 	}
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-			return
-		}
-		err = tx.Commit()
-	}()
 
 	stmt, err := tx.Prepare(`UPDATE money SET money=money+? WHERE id=?`)
 	if err != nil {
