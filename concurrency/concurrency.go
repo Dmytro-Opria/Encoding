@@ -19,20 +19,20 @@ func makeGorutine(count int) {
 	wg.Add(count)
 
 	for i := 0; i < count ; i++ {
-		timer := time.Now().Second() + 10
-		go func() {
+		timer := time.Now().Add(10 * time.Second)
+		go func(n int) {
 			for  {
 				mut.Lock()
-				GlobalMap["ABC"] = ABC[i-1]
-				fmt.Println(ABC[i-1])
+				GlobalMap["ABC"] = ABC[n]
+				fmt.Println(ABC[n])
 				mut.Unlock()
 
-				if time.Now().Second() > timer {
+				if time.Now().Unix() > timer.Unix() {
 					wg.Done()
 					break
 				}
 			}
-		}()
+		}(i)
 	}
 	wg.Wait()
 }
