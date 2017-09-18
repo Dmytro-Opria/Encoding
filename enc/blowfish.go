@@ -48,7 +48,7 @@ func decodeBlowFish(base64Str string, length int, key string) ([]byte, error) {
 
 	if err != nil {
 		fmt.Println("Can`t make new cipher", err)
-		
+
 		return []byte{}, err
 	}
 
