@@ -1,0 +1,10 @@
+syntax = 'proto3';
+
+package users;
+
+message User {
+    string Name = 1;
+    int32 Age = 2;
+    repeated string Documents = 3;
+
+}
