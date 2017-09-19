@@ -1,58 +1,38 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/gogo/protobuf/proto"
-	"io"
-	"net/http"
 	"os"
 	tm "untitled/encoding/grpc/time"
+	"google.golang.org/grpc"
+	"golang.org/x/net/context"
+)
+
+const (
+	host = "localhost:3000"
 )
 
 func main() {
-	timeZone := "UTC"
+	conn, err := grpc.Dial(host, grpc.WithInsecure())
+	if err != nil {
+		fmt.Printf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := tm.NewTimerClient(conn)
 
+	timeZone := "UTC"
 	if len(os.Args) > 1 {
 		timeZone = os.Args[1]
 	}
 
-	reqStr := &tm.Request{timeZone}
-	protoBytes, err := proto.Marshal(reqStr)
-	if err != nil {
-		fmt.Println("Can`t marshal request", err)
-		return
+	rm, err := c.ReturnTimeNow(context.Background(), &tm.Request{TimeZone:timeZone})
+	if  err != nil {
+		fmt.Printf("Can`t get time: %v", err)
 	}
-	req, err := http.NewRequest("POST", "http://localhost:3005/", bytes.NewBuffer(protoBytes))
-	if err != nil {
-		fmt.Println("Can`t make post request", err)
-		return
+	printErr := rm.GetError()
+
+	if printErr == "" {
+		printErr = "nil"
 	}
-	req.Header.Set("Content-Type", "application/x-protobuf")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	if err != nil {
-		fmt.Println("Can`t get response from server", err)
-		return
-	}
-
-	newResult := &tm.Result{}
-
-	buf := bytes.NewBuffer(nil)
-
-	io.Copy(buf, resp.Body)
-
-	err = proto.Unmarshal(buf.Bytes(), newResult)
-
-	if err != nil {
-		fmt.Println("Can`t unmarshal", err)
-		return
-	}
-	fmt.Printf("Time now: %s\nProccesing time: %v nsec\n", newResult.GetNow(), newResult.GetProcesingTime())
+	fmt.Printf("Time now: %s\nProccesing time: %v nsec\nError: %s\n", rm.GetNow(), rm.GetProcesingTime(), printErr)
 }

@@ -1,50 +1,53 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/gogo/protobuf/proto"
-	"io"
-	"net/http"
+	"google.golang.org/grpc"
 	"time"
 	tm "untitled/encoding/grpc/time"
+	"golang.org/x/net/context"
+	"net"
+	"log"
+	"google.golang.org/grpc/reflection"
 )
 
-var (
-	port = ":3005"
+const (
+	defaultTimeZone = "UTC"
+	port = ":3000"
 )
 
-const defaultTimeZone = "UTC"
+type server struct {}
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
-
-	buf := bytes.NewBuffer(nil)
-	io.Copy(buf, r.Body)
-
-	bufStr := string(buf.Bytes()[2:])
-
-	loc, err := time.LoadLocation(bufStr)
+func (s *server ) ReturnTimeNow(ctx context.Context, in *tm.Request) (*tm.Result, error) {
+	start := time.Now()
+	locStr := in.TimeZone
+	loc, err := time.LoadLocation(locStr)
 
 	if err != nil {
-		fmt.Println("Can`t set location " + bufStr + ", default location is \"UTC\"")
+		fmt.Println("Can`t set location " + locStr + ", default location is \"UTC\"")
 		fmt.Println(err)
-		loc, _ = time.LoadLocation(defaultTimeZone)
+		loc, err = time.LoadLocation(defaultTimeZone)
 	}
 
 	now := time.Now().In(loc)
 
-	res := &tm.Result{now.Format(time.RFC822), int64(time.Since(now))}
-
-	protoResult, err := proto.Marshal(res)
 	if err != nil {
-		fmt.Println("Can`t marshal", err)
+		return &tm.Result{now.Format(time.RFC822), int64(time.Since(start)), err.Error()}, err
 	}
-	w.Header().Set("Content-Type", "application/x-protobuf")
-	w.Write(protoResult)
+
+	return &tm.Result{now.Format(time.RFC822), int64(time.Since(start)), ""}, nil
 }
 
 func main() {
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(port, nil)
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	tm.RegisterTimerServer(s, &server{})
+	// Register reflection service on gRPC server.
+	reflection.Register(s)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }

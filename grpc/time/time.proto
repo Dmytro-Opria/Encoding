@@ -2,9 +2,14 @@ syntax = "proto3";
 
 package time;
 
+service Timer {
+     rpc ReturnTimeNow (Request) returns (Result) {}
+}
+
 message Result {
      string Now = 1;
      int64 ProcesingTime = 2;
+     string Error = 3;
 }
 
 message Request {
