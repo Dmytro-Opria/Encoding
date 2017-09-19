@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package time;
+
+message Result {
+     string Now = 1;
+     int64 ProcesingTime = 2;
+}
+
+message Request {
+     string TimeZone = 1;
+}

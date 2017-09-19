@@ -1,19 +1,19 @@
 package main
 
 import (
-	"log"
-	"github.com/golang/protobuf/proto"
-	"fmt"
-	"untitled/encoding/protobuf/users"
-	"os"
-	"io"
 	"bytes"
+	"fmt"
+	"github.com/golang/protobuf/proto"
+	"io"
+	"log"
+	"os"
+	"untitled/encoding/protobuf/users"
 )
 
-var user = &users.User {
-	Name: "John Doe",
-	Age:  20,
-	Documents:  []string{"doc_A","doc_B","doc_C"},
+var user = &users.User{
+	Name:      "John Doe",
+	Age:       20,
+	Documents: []string{"doc_A", "doc_B", "doc_C"},
 }
 var path = "proto"
 
@@ -28,7 +28,7 @@ func main() {
 	fmt.Println(newUser)
 }
 
-func encode()(data []byte,err error){
+func encode() (data []byte, err error) {
 	data, err = proto.Marshal(user)
 	if err != nil {
 		log.Fatal("marshaling error: ", err)
@@ -36,7 +36,7 @@ func encode()(data []byte,err error){
 	return
 }
 
-func decode(data []byte) (newUser *users.User, err error){
+func decode(data []byte) (newUser *users.User, err error) {
 	newUser = &users.User{}
 	err = proto.Unmarshal(data, newUser)
 	if err != nil {
@@ -45,7 +45,7 @@ func decode(data []byte) (newUser *users.User, err error){
 	return
 }
 
-func writeData (data []byte)(err error){
+func writeData(data []byte) (err error) {
 	file, err := os.Create(path)
 	if err != nil {
 		fmt.Println("Can`t create file", err)
@@ -56,7 +56,7 @@ func writeData (data []byte)(err error){
 	return
 }
 
-func readData()(data []byte, err error){
+func readData() (data []byte, err error) {
 	buf := bytes.NewBuffer(nil)
 
 	file, err := os.Open(path)
