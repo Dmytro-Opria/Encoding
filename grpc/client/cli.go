@@ -52,7 +52,7 @@ func main() {
 
 	if err != nil {
 		fmt.Println("Can`t unmarshal", err)
-		return 
+		return
 	}
-	fmt.Printf("Time now: %s\nProccesing time: %v nsec\n", newResult.Now, newResult.ProcesingTime)
+	fmt.Printf("Time now: %s\nProccesing time: %v nsec\n", newResult.GetNow(), newResult.GetProcesingTime())
 }
