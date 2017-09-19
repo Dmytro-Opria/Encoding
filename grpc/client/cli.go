@@ -1,13 +1,13 @@
 package main
 
 import (
-	"net/http"
-	"fmt"
-	tm "untitled/encoding/grpc/time"
-	"github.com/gogo/protobuf/proto"
 	"bytes"
+	"fmt"
+	"github.com/gogo/protobuf/proto"
 	"io"
+	"net/http"
 	"os"
+	tm "untitled/encoding/grpc/time"
 )
 
 func main() {
@@ -15,16 +15,15 @@ func main() {
 
 	if len(os.Args) > 1 {
 		timeZone = os.Args[1]
-		fmt.Println([]byte(timeZone))
 	}
 
 	reqStr := &tm.Request{timeZone}
 	protoBytes, err := proto.Marshal(reqStr)
 	if err != nil {
-		fmt.Println("Can`n marshal request", err)
+		fmt.Println("Can`t marshal request", err)
 	}
 	req, err := http.NewRequest("POST", "http://localhost:3005/", bytes.NewBuffer(protoBytes))
-	if  err != nil {
+	if err != nil {
 		fmt.Println("Can`t make post request", err)
 	}
 	req.Header.Set("Content-Type", "application/x-protobuf")
@@ -51,5 +50,5 @@ func main() {
 	if err != nil {
 		fmt.Println("Can`t unmarshal", err)
 	}
-	fmt.Printf("Time now: %s\nProccesing time: %v nsec\n",newResult.Now, newResult.ProcesingTime)
+	fmt.Printf("Time now: %s\nProccesing time: %v nsec\n", newResult.Now, newResult.ProcesingTime)
 }
