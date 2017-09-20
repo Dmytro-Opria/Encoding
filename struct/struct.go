@@ -8,16 +8,27 @@ import (
 
 type A struct {
 	Field int32 `myTag1:"abc" myTag3:"qwe"`
+	Field1 int32 `myTag2:"zxc" myTag4:"dfg"`
+	Field3 int32 `myTag5:"jkl" myTag7:"bnm"`
 }
 
 func main() {
-	typeA := &A{1}
-	field, ok := reflect.TypeOf(typeA).Elem().FieldByName("Field")
-	if !ok {
-		fmt.Println("Can`t get field")
-		return
+	typeA := A{}
+
+	reflectValue := reflect.ValueOf(typeA)
+	typ := reflectValue.Type()
+
+	for i := 0; i < typ.NumField(); i++ {
+
+		field := typ.Field(i)
+
+		if field.PkgPath != "" {
+			continue
+		}
+
+		fmt.Println(getTagsFromStr(string(field.Tag)))
+		fmt.Println("========================================")
 	}
-	fmt.Println(getTagsFromStr(string(field.Tag)))
 }
 
 func getTagsFromStr(tagStr string) (res string) {
