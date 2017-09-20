@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type A struct {
@@ -16,6 +17,22 @@ func main() {
 		fmt.Println("Can`t get field")
 		return
 	}
-	fmt.Println(field.Tag.Get("myTag1"))
-	fmt.Println(field.Tag.Get("myTag3"))
+	fmt.Println(getTagsFromStr(string(field.Tag)))
+}
+
+func getTagsFromStr(tagStr string) (res string) {
+
+	splitedTags := strings.Split(tagStr, " ")
+
+	for i, v := range splitedTags {
+
+		tag := strings.Split(v, ":")
+
+		if i+1 == len(splitedTags) {
+			res += fmt.Sprintf("Tag: %s\nValue: %s", tag[0], strings.Trim(tag[1], `""`))
+			return
+		}
+		res += fmt.Sprintf("Tag: %s\nValue: %s\n", tag[0], strings.Trim(tag[1], `""`))
+	}
+	return
 }
