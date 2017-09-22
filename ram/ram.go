@@ -30,6 +30,8 @@ func memoryQuery() (memTotal, memFree string){
 		return
 	}
 
+	defer file.Close()
+
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(file)
 
@@ -51,8 +53,8 @@ func memoryQuery() (memTotal, memFree string){
 func monitorMemory() {
 	for {
 		memTotal, memFree := memoryQuery()
-		fmt.Printf("Memory Total = %s, Memory Free = %s\n", memTotal, memFree)
-
+		//fmt.Printf("Memory Total = %s, Memory Free = %s\n", memTotal, memFree)
+		fmt.Printf("\rMemory Total = %s, Memory Free = %s", memTotal, memFree)
 		time.Sleep(1 * time.Second)
 	}
 }
