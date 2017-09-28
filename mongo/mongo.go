@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"golib/mongo"
 	"gopkg.in/mgo.v2/bson"
+	"sync"
 	"time"
 )
 
@@ -13,10 +14,19 @@ type Person struct {
 	LastUpdate time.Time `bson:"lastupdate"`
 	Count      int       `bson:"count"`
 }
+type InvalidBidRequest struct {
+	TickersCompositeId int       `bson:"tickersCompositeId"`
+	Date               time.Time `bson:"date"`
+	Reason             string    `bson:"reason"`
+}
+
+var (
+	globalMgoSession mongo.MongoSession
+	invalidBidMu     sync.Mutex
+	invalidBids      = make(map[InvalidBidRequest]int, 0)
+)
 
 type MongoInitConfig struct{}
-
-var globalMgoSession mongo.MongoSession
 
 func (_ MongoInitConfig) Get() *mongo.MongodbConfig {
 	var cfg = mongo.MongodbConfig{
@@ -39,7 +49,16 @@ func main() {
 	//fmt.Println(findFirstOne())
 	//fmt.Println(findLastOne())
 	//fmt.Println(findWithNatural())
-	incrementAllCounters()
+	//incrementAllCounters()
+	ToInvalidBidsList(1, time.Now(), []string{"First error"})
+	ToInvalidBidsList(1, time.Now(), []string{"First error"})
+	ToInvalidBidsList(1, time.Now(), []string{"First error"})
+	ToInvalidBidsList(1, time.Now(), []string{"First error"})
+	ToInvalidBidsList(2, time.Now(), []string{"Second error"})
+	ToInvalidBidsList(3, time.Now(), []string{"Third error"})
+	ToInvalidBidsList(4, time.Now(), []string{"Fourth error"})
+	ToInvalidBidsList(5, time.Now(), []string{"Five error"})
+	SaveInvalidBidRequests()
 }
 
 func insert() {
@@ -121,4 +140,49 @@ func incrementAllCounters() {
 		fmt.Println("Error ocured", err)
 	}
 	fmt.Println(info)
+}
+
+func ToInvalidBidsList(tickerCompositeId int, tm time.Time, reasons []string) {
+	date := time.Date(tm.Year(), tm.Month(), tm.Day(), 0, 0, 0, 0, tm.Location())
+
+	key := InvalidBidRequest{}
+	key.TickersCompositeId = tickerCompositeId
+	key.Date = date
+	for _, reason := range reasons {
+		key.Reason += reason + "\n"
+	}
+
+	if val, ok := invalidBids[key]; ok {
+		invalidBids[key] = val + 1
+		return
+	}
+	invalidBids[key] = 1
+}
+
+func SaveInvalidBidRequests() {
+	saveInvalidBidRequests(invalidBids)
+}
+
+func saveInvalidBidRequests(bidRequests map[InvalidBidRequest]int) {
+
+	if len(bidRequests) == 0 {
+		return
+	}
+
+	invalidBidMu.Lock()
+	defer invalidBidMu.Unlock()
+
+	dbname, sess, def := globalMgoSession.Get()
+	defer def()
+
+	c := sess.DB(dbname).C("invalid_bid_requests")
+
+	for key, value := range bidRequests {
+
+		if _, err := c.Upsert(key,bson.M{"$inc": bson.M{"counter": value}/*, "$set": key*/}); err != nil {
+			fmt.Printf("save invalidBidRequest %s %+v\n", err.Error(), key)
+		}
+
+		delete(bidRequests, key)
+	}
 }

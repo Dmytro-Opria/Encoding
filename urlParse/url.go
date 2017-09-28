@@ -23,7 +23,7 @@ func main() {
 	fmt.Println(p)
 
 	fmt.Println(u.Host)
-	host, port, _ :=net.SplitHostPort(u.Host)
+	host, port, _ := net.SplitHostPort(u.Host)
 
 	fmt.Println(host)
 	fmt.Println(port)
