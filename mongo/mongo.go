@@ -57,7 +57,7 @@ func main() {
 	ToInvalidBidsList(2, time.Now(), []string{"Second error"})
 	ToInvalidBidsList(3, time.Now(), []string{"Third error"})
 	ToInvalidBidsList(4, time.Now(), []string{"Fourth error"})
-	ToInvalidBidsList(5, time.Now(), []string{"Five error"})
+	ToInvalidBidsList(5, time.Now(), []string{"Five error","Six error"})
 	SaveInvalidBidRequests()
 }
 
@@ -148,8 +148,12 @@ func ToInvalidBidsList(tickerCompositeId int, tm time.Time, reasons []string) {
 	key := InvalidBidRequest{}
 	key.TickersCompositeId = tickerCompositeId
 	key.Date = date
-	for _, reason := range reasons {
-		key.Reason += reason + "\n"
+	for i, reason := range reasons {
+		if len(reasons) == i+1 {
+			key.Reason += reason
+		} else {
+			key.Reason += reason + ", "
+		}
 	}
 
 	if val, ok := invalidBids[key]; ok {
